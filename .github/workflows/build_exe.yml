@@ -1,0 +1,54 @@
+# =============================================================================
+#  GitHub Actions Workflow — Build SpringMassSolver.exe on Windows
+# =============================================================================
+#
+#  HOW TO USE:
+#    1. In your GitHub repo, create folder:  .github/workflows/
+#    2. Upload this file into that folder as:  build_exe.yml
+#    3. Go to your repo -> Actions tab -> "Build SpringMassSolver EXE"
+#    4. Click "Run workflow" -> "Run workflow" (green button)
+#    5. Wait ~5 minutes for it to finish
+#    6. Click the completed run -> scroll down -> download "SpringMassSolver-EXE"
+#    7. Unzip -> double-click SpringMassSolver.exe -> enjoy!
+#
+# =============================================================================
+
+name: Build SpringMassSolver EXE
+
+on:
+  workflow_dispatch:        # manual trigger — you click "Run workflow"
+
+jobs:
+  build-windows-exe:
+    runs-on: windows-latest  # GitHub spins up a real Windows machine
+
+    steps:
+
+      # Step 1: Check out your repo files onto the Windows machine
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Python 3.11 on the Windows machine
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # Step 3: Install all required Python packages + PyInstaller
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install dash plotly numpy scipy pyinstaller
+
+      # Step 4: Build the .exe using PyInstaller
+      - name: Build executable with PyInstaller
+        run: |
+          pyinstaller --onefile --name "SpringMassSolver" --console spring_mass_solver.py
+
+      # Step 5: Upload the .exe so you can download it from GitHub
+      - name: Upload EXE as downloadable artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SpringMassSolver-EXE
+          path: dist/SpringMassSolver.exe
+          retention-days: 30    # file stays available for 30 days
